@@ -8,7 +8,7 @@ marcoscasalsantos
 
 # Miembros del Equipo
 Marcos Casal Santos
-Id empleado en Indra:566101
+Id empleado en Indra: 566101
 
 # URL aplicación
 http://aforo.c1.biz/
