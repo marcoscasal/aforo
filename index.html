@@ -1,0 +1,440 @@
+<!doctype  html>
+<!-- No establecemos el idioma para que jquery.i18n tome el etablecido en el navegador <html lang="en"> -->
+<head>
+
+    <!-- Required meta tags -->
+	<!-- Indica que la codificación del archivo es UTF-8 -->
+	<meta charset="utf-8">
+	
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="author" content="Marcos Casal Santos">
+    <meta name="contact" content="marcos.casalsantos@gmail.com" />
+    <meta name="keywords" content="aforo, contar personas">
+    
+    <title>Control de aforo</title>	
+    
+
+	<link rel="icon" type="image/png" href="/favicon.png"/>
+	
+	<!-- Bootstrap CSS latest compiled and minified at 04/2019 -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+	<!-- Icons Fonts Awesome -->	
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" integrity="sha256-46qynGAkLSFpVbEBog43gvNhfrOj+BmwXdxFgVK/Kvc=" crossorigin="anonymous" />
+
+	<!-- jQuery -->
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+	<!-- jQuery i18n -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.js" integrity="sha256-jVzWNEkuMshRoEipwyY2dsurvqBbVXnDkyYQyIYwvuE=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.i18n/1.0.5/jquery.i18n.messagestore.js" integrity="sha256-3/fy7aF8FVQuiLY/vIcfuktM81MyxzE2zKDxk/p+Ffs=" crossorigin="anonymous"></script> 	 
+
+
+	<!-- javascript used by bootstrap -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+	<!-- C3 graphs -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.15/c3.min.css">				
+	
+	<!-- javascrip to connect with firebase -->	
+	<script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
+	
+	<!-- para floating labels que se meten dentro del input-->
+	<link rel="stylesheet" href="https://getbootstrap.com/docs/4.0/examples/floating-labels/floating-labels.css" rel="stylesheet">
+
+
+	<!-- Los siguientes módulosPara reducir la cantidad de código que usa tu app, incluye solo las funciones que necesitas. 
+	Los componentes individuales para instalar son los siguientes: 
+	Incluye los componentes individuales del CDN que necesitas (incluye firebase-app en primer lugar):
+	-->
+	<!--firebase-app: El cliente principal de firebase (obligatorio) poner en primer lugar -->
+	<script src="https://www.gstatic.com/firebasejs/3.8.0/firebase-app.js"></script>
+	<!--firebase-auth: Firebase Authentication (opcional)-->
+	<script src="https://www.gstatic.com/firebasejs/3.8.0/firebase-auth.js"></script>
+	<!--firebase-database: Firebase Realtime Database (opcional)-->
+	<script src="https://www.gstatic.com/firebasejs/3.8.0/firebase-database.js"></script>
+	<!--firebase-storage: Cloud Storage (opcional)-->
+	<script src="https://www.gstatic.com/firebasejs/3.8.0/firebase-storage.js"></script>
+	<!--firebase-messaging: Firebase Cloud Messaging (opcional)-->
+	<script src="https://www.gstatic.com/firebasejs/3.8.0/firebase-messaging.js"></script>
+	
+
+	<!-- c3 for graphs -->
+	<!-- c3 esta basado en c3 por lo que se tienen que cargar antes y tiene que ser v3.X los v.4.x no son compatibles -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.15/c3.min.js"></script>
+
+		
+	<!-- Este script contiene información de inicialización para configurar Firebase JavaScript SDK
+	a fin de usar Authentication, Cloud Storage y Realtime Database. -->	
+	<script>
+	  // Initialize Firebase
+	  var appConfiguration = {
+		apiKey: "AIzaSyBHx2HlYUo8mZMhJod2EcQQ5Z8Q1dsbtM4",
+		authDomain: "control-de-aforo.firebaseapp.com",
+		databaseURL: "https://control-de-aforo.firebaseio.com",
+		projectId: "control-de-aforo",
+		storageBucket: "",
+		messagingSenderId: "9608588429"
+	  };
+	  
+	  // Initialize the default app
+	  var defaultApp = firebase.initializeApp(appConfiguration);
+	  
+	</script>		
+	
+</head>
+<body>	
+	
+	<div role="main" class="container"> 
+	
+		<div Id="formularioInicialDiv" class="" style="display:none">
+
+			<div class="panel panel-primary">
+				
+				<div class="text-center col-sm" >
+					<h1 class="h3 mb-3" data-i18n="crear-evento">Crear evento</h1>
+				</div>
+																
+				<div class="form-label-group">					
+					<input id="descripcionEventoInput" class="form-control input-lg" placeholder="Descripción del evento">
+					<label for="descripcionEventoInput" data-i18n="descripcion-evento">Descripción del evento</label>
+				</div>
+			
+				<div class="form-label-group">				
+					<input id="aforoMaximoInput" type="number" class="form-control input-lg" placeholder="Aforo máximo">
+					<label for="aforoMaximoInput" data-i18n="aforo-maximo">Aforo máximo</label>
+				</div>
+				
+				<div class="text-center">	
+					<button id="controlarAforoButton" type="submit" class="btn btn-lg btn-primary btn-block" onClick="controlarAforoButtonHandler()" data-i18n="controlar-aforo">Controlar aforo</button>
+				</div>				
+
+			</div>		
+
+		</div>	<!-- contenedorInicialDiv-->
+		
+		<div id="controlAforoDiv" style="display:none">
+			
+			<div class="card">
+
+				<div class="card-header text-white bg-info">
+					<h5><span id="descripcionDiv"></span> - <span id="aforoMaximoDiv"></span> <span data-i18n="plazas">plazas</span> </h5>
+				</div>
+
+				<div class="card-body">
+					<!-- Gráfica de medio círculo -->
+					<div class="row align-items-center">
+						<div class="col-12">
+							<div id="chart">	
+							</div>
+						</div>
+					</div>
+					
+					<div class="row text-center">
+										
+						<div id="saleButtonDiv" class="col-6">
+
+							<h2>
+								<span id="aforoRestanteDiv"></span>
+							</h2>
+
+							<h6 data-i18n="disponibles">
+								Disponibles
+							</h6>
+
+							<button type="submit" class="btn btn-squared-lg btn-success btn-block" onClick="decreaseByOneAforoActualBD();">
+								<br>
+								<i class="fas fa-sign-out-alt fa-5x fa-flip-horizontal"></i>
+								<br>
+								<h1 data-i18n="sale">Sale</h1>
+								<br>
+							</button>	  
+
+						</div>
+						
+						<div id="entraButtonDiv" class="col-6">
+
+							<h2>
+								<span id="aforoActualDiv" ></span>
+							</h2>
+
+							<h6 data-i18n="ocupadas">
+								Ocupadas
+							</h6>
+							
+							<button type="submit" class="btn btn-sq-lg btn-danger btn-block" onClick="increaseByOneAforoActualBD();">
+								<br>
+								<i class="fas fa-sign-in-alt fa-5x"></i>
+								<br>
+								<h1 data-i18n="entra">Entra</h1>
+								<br>
+							</button>	  	
+						</div>		
+
+					</div> <!--row -->
+
+				</div>
+			</div>			
+		</div> <!-- controlAforoDiv -->
+		
+	</div> <!-- container -->
+	
+	<!-- Diálogo con mensaje informativo-->
+	<div id="informacionDialog" class="modal fade" tabindex="-1" role="dialog">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-body">
+			<h6><p data-i18n="informacion-uso">Copia y comparte la URL generada con las personas que controlarán el aforo del evento</p></h6>
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-default btn-block" data-dismiss="modal" data-i18n="aceptar"> Aceptar</button>			
+		  </div>
+		</div><!-- /.modal-content -->
+	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->	
+	
+
+    <script>
+	
+	jQuery(function($) {
+	
+		// Carga las internacionalizaciones para los idiomas 'en' y 'es'
+		$.i18n().load( {
+				'en': {
+					"crear-evento": "Create event",
+					"descripcion-evento": "Event description",
+					"aforo-maximo": "Maximum capacity",
+					"controlar-aforo": "Check capacity",
+					"plazas": "Places",
+					"disponibles": "Available",
+					"ocupadas": "Occupied",
+					"sale": "Out",
+					"entra": "In",
+					"informacion-uso": "Copy and share the generated URL with the people who will control the capacity of the event",
+					"aceptar": "Accept"
+				},
+				'es': {
+					"crear-evento": "Crear evento",
+					"descripcion-evento": "Descripción del evento",
+					"aforo-maximo": "Aforo máximo",
+					"controlar-aforo": "Controlar aforo",
+					"plazas": "Plazas",
+					"disponibles": "Disponibles",
+					"ocupadas": "Ocupadas",
+					"sale": "Sale",
+					"entra": "Entra",
+					"informacion-uso": "Copia y comparte la URL generada con las personas que controlarán el aforo del evento",
+					"aceptar": "Aceptar"
+				}
+		});
+		
+		
+		// Aplica la intenacionalización al elemento del dom indicado y sus hijos
+		$('body').i18n();
+	
+	
+	});
+                       
+
+		var chart = c3.generate({
+			data: {
+				columns: [
+					['data', 91.4]
+				],
+				type: 'gauge'
+			},
+			gauge: {
+		        label: {
+		            show: false // to turn off the min/max labels.
+		        },
+			},
+			color: {
+				pattern: ['#419641', '#F6C600','#F97600', '#c12e2a'], // the three color levels for the percentage values.
+				threshold: {
+					values: [25, 50, 75, 100]
+				}
+			}
+		});
+
+
+		// You can retrieve services via the defaultApp variable...
+		var defaultStorage = defaultApp.storage();
+		var defaultDatabase = defaultApp.database();			
+					
+		//El eventId de la URL tambien será el id del registro de BD en firebase			
+		var eventId = getEventIdFromURL(); 
+		
+		// Guarda el valor del aforoMaximo que se establece por el usuario en el formulario inicial
+		var aforoMaximo;
+		
+		if (eventId == null) {
+			$("#formularioInicialDiv").show();
+			$("#controlAforoDiv").hide();
+		}
+		else{		
+			initControlAforo();
+		};
+
+		// Handler para el evento keyup del cursor derecho que ejecuta la funcion entraButtonHadler (Si se usa event keydown puede contar de más)
+		$(document).on('keyup',function(e) {
+			if(e.which == 39) { // cursor right -> Entra
+				increaseByOneAforoActualBD();
+			}
+		});
+
+		$(document).on('keyup',function(e) {
+			if(e.which == 37) { // cursor left -> Sale
+				decreaseByOneAforoActualBD();
+			}
+		});
+		
+		function initControlAforo() {
+		
+			$("#formularioInicialDiv").hide();
+			$("#controlAforoDiv").show();
+
+			//firebase triggers events called value which will be called if there is anything changed on the server
+			// ref https://firebase.google.com/docs/database/web/read-and-write
+			
+			// Define un listener en el evento "change value" de la variable descripcion
+			// El listener is triggered una vez para obtener el valor inicial del la variable y al cambiar de valor		
+			defaultDatabase.ref(eventId + '/descripcion').on('value', function(snapshot) {				
+				$('#descripcionDiv').text(snapshot.val());
+			});
+			
+			// Define un listener en el evento "change value" de la variable aforoActual
+			// El listener is triggered una vez para obtener el valor inicial del la variable y al cambiar de valor		
+			defaultDatabase.ref(eventId + '/aforoActual').on('value', function(snapshot) {
+				
+				aforoActual = snapshot.val();
+				
+				chart.load({
+					columns: [['data', aforoActual/aforoMaximo*100]]
+				});
+							
+				$('#aforoActualDiv').text(aforoActual);
+			});
+			
+			// Define un listener en el evento "change value" de la variable aforoRestante
+			// El listener is triggered una vez para obtener el valor inicial de la variable y al cambiar de valor
+			defaultDatabase.ref(eventId + '/aforoRestante').on('value', function(snapshot) {
+				
+				aforoRestante = snapshot.val();
+				
+				// Update dom element "aforoRestanteDiv" 
+				$('#aforoRestanteDiv').text(aforoRestante);	
+			});
+			
+			// Define un listener en el evento "change value" de la variable aforoMaximo
+			// El listener is triggered una vez para obtener el valor inicial del la variable y al cambiar de valor
+			defaultDatabase.ref(eventId + '/aforoMaximo').on('value', function(snapshot) {
+				aforoMaximo = snapshot.val();
+
+				// Update dom element "aforoMaximoDiv" 
+				$('#aforoMaximoDiv').text(aforoMaximo);
+			});
+						
+			$('#informacionDialog').modal();
+			
+		};
+					
+		function increaseByOneAforoActualBD() {
+			
+			/** Using a transaction prevents aforoActual count from being incorrect if multiple users increase the aforoActual at the same time or the client had stale data. 
+			* If the transaction is rejected, the server returns the current value to the client, which runs the transaction again with the updated value. 
+			* This repeats until the transaction is accepted or you abort the transaction.
+			* @see https://firebase.google.com/docs/database/web/read-and-write
+			*/
+			
+			defaultDatabase.ref(eventId + '/aforoActual').transaction(function(currentData) {
+				if( currentData === null ) {
+					return (currentData = 0);
+				} else {					
+					
+					var aforoRestante = aforoMaximo - (currentData + 1);
+					
+					defaultDatabase.ref(eventId).update({'aforoRestante':aforoRestante})
+					
+					return (currentData + 1);					
+				}
+
+			});
+			
+		};			
+			
+		function decreaseByOneAforoActualBD() {
+			
+			defaultDatabase.ref(eventId + '/aforoActual').transaction(function(currentData) {
+				if( currentData === null ) {
+					return (currentData = 0);
+				} else {					
+					
+					var aforoRestante = aforoMaximo - (currentData - 1);
+										
+					defaultDatabase.ref(eventId).update({'aforoRestante':aforoRestante})
+					
+					return (currentData - 1);
+					
+				}
+
+			});
+		};		
+		
+		function getEventIdFromURL() {
+			
+			var eventId;
+			
+			var urlParameters= decodeURIComponent(window.location.search.substring(1));
+			
+			if (urlParameters != "") {
+				var parameterEventIdKeyValueArray = urlParameters.split('=');
+				
+				if (parameterEventIdKeyValueArray[1] != null) {
+					eventId = parameterEventIdKeyValueArray[1];
+				}
+			}
+			
+			return eventId;
+        };
+   		
+		function controlarAforoButtonHandler() {
+		
+			var descripcionEvento = $("#descripcionEventoInput").val();
+			
+			aforoMaximo = parseInt($("#aforoMaximoInput").val());
+			
+			var timestamp = new Date();
+		
+			// Obtener un nuevo eventoId como una key para un nuevo registro de BD
+			eventId = defaultDatabase.ref().push().key;
+		
+			// Crea un nuevo objeto newEvent con los datos introducidos por el usuario
+			var newEvent = 
+				{
+					[eventId]: 
+						{
+							"descripcion": descripcionEvento,
+							"timestamp": timestamp,
+							"aforoActual": 0,
+							"aforoRestante": aforoMaximo, 
+							"aforoMaximo": aforoMaximo
+						}
+				};
+		
+			// Añade el objeto "newEvent" en la base de datos
+			defaultDatabase.ref().update(newEvent);				
+					
+			// Añade el parámetro eventId a la URL actual
+			window.history.replaceState(null, null, window.location.href + "?eventId=" + eventId);
+		
+			// oculta el div con el formulario inicial y muestra el div con los botones para el control de aforo
+			initControlAforo();	
+		}
+
+    </script>
+	
+</body>
+</html>
